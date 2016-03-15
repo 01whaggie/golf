@@ -21,4 +21,36 @@ public class Vector {
         return Math.sqrt((x*x) + (y*y) + (z*z));
     }
 
+    public Vector normalize(){
+        double length = this.getLength();
+        Vector normalizedVector = new Vector(this.getX()/length, this.getY()/length, this.getZ()/length);
+        return normalizedVector;
+    }
+
+    public double dotProduct(Vector vector2) {
+        if (vector2.getLength() != 1) {
+            vector2 = vector2.normalize();
+        }
+
+        double dotProduct = (this.getX() * vector2.getX()) + (this.getY() * vector2.getY()) + (this.getZ() * vector2.getZ());
+        return dotProduct;
+    }
+
+    public Vector crossProduct(Vector vector2){
+        Vector multipliedVector = new Vector(this.getX()*vector2.getX(), this.getY()*vector2.getY(), this.getZ() * vector2.getZ());
+        return multipliedVector;
+    }
+
+    public Vector crossProduct(double number){
+        return new Vector(this.getX()*number, this.getY()*number, this.getZ()*number);
+    }
+
+    public Vector add(Vector vector2){
+        return new Vector(this.getX() + vector2.getX(), this.getY() + vector2.getY(), this.getZ() + vector2.getZ());
+    }
+
+    public Vector negative(){
+        return new Vector(- this.getX(), -this.getY(), -this.getZ());
+    }
+
 }
