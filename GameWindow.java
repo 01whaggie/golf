@@ -39,7 +39,8 @@ public class GameWindow implements ApplicationListener {
 		// ========
 		Vector startingPos = new Vector(30, 30, 0);
 		Vector velocity = new Vector(20, 10, 0);
-		ball = new GolfBall(startingPos, velocity, 2, 1, this.map);
+		double radius = 1;
+		ball = new GolfBall(startingPos, velocity, radius, 1, this.map);
 
 
 		fps = new FPSLogger();

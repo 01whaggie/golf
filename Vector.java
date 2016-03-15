@@ -53,4 +53,9 @@ public class Vector {
         return new Vector(- this.getX(), -this.getY(), -this.getZ());
     }
 
+    @Override
+    public String toString(){
+        return "Vec3: x=" + x + ", y=" + y + " ,z=" + z;
+    }
+
 }

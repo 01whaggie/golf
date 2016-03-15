@@ -5,7 +5,7 @@ import java.util.ArrayList;
  */
 public class GolfBall {
 
-    private static double FRICTION = 1.0;
+    private static double FRICTION_COEFFICIENT = 1.5;
 
     //private double angle;
     private Vector position;
@@ -37,8 +37,14 @@ public class GolfBall {
         }
 
         this.bounce(this.map.getWalls());
+        
+        // friction
+        // this.applyFriction();
+        double friction = FRICTION_COEFFICIENT * mass;
+        Vector frictionForce = velocity.negative().normalize().crossProduct(friction);
+        Vector dv = frictionForce.crossProduct(deltaTime / mass);
 
-        this.applyFriction();
+        velocity = velocity.add(dv);
 
         position.setX(position.getX() + (velocity.getX() * deltaTime));
         position.setY(position.getY() + (velocity.getY() * deltaTime));
@@ -47,9 +53,9 @@ public class GolfBall {
     }
 
     public void applyFriction(){
-        velocity.setX((velocity.getX())*FRICTION);
-        velocity.setY((velocity.getY())*FRICTION);
-        velocity.setZ((velocity.getZ())*FRICTION);
+        velocity.setX((velocity.getX())*FRICTION_COEFFICIENT);
+        velocity.setY((velocity.getY())*FRICTION_COEFFICIENT);
+        velocity.setZ((velocity.getZ())*FRICTION_COEFFICIENT);
 
     }
 
@@ -60,19 +66,7 @@ public class GolfBall {
         return false;
     }
 
-    public double[] isColliding(double x1, double y1, double x2, double y2){
-        // double deltaX = x1 - x2;
-        // double deltaY = (y1 - y2);
-        // double constant = 0.001;
-
-        // for (int j = 0; (((j*constant*deltaX) + x1) < deltaX)  && (((j*constant*deltaY)+ y1) < deltaY); j++){
-        //     if (this.isInside(x1 + deltaX*constant, y1 + deltaY*constant)){
-        //         double coordinates[] = new double[2];
-        //         coordinates[0] = x1 + deltaX*constant;
-        //         coordinates[1] = y1 + deltaY*constant;
-        //         return coordinates;
-        //     }
-        // }
+    public Vector isColliding(double x1, double y1, double x2, double y2){
         Vector seg_a = new Vector(x1, y1, 0);
         Vector seg_b = new Vector(x2, y2, 0);
         Vector seg_v = seg_b.add(seg_a.negative());
@@ -88,39 +82,30 @@ public class GolfBall {
             closest = seg_v.normalize().crossProduct(len_closest);
             closest = closest.add(seg_a);
         }
+
         Vector dist_v = position.add(closest.negative());
         if(dist_v.getLength() <= radius){
-            return new double[2];
+            Vector offset = dist_v.normalize().crossProduct(radius-dist_v.getLength());
+            return offset;
         }else{
             return null;
         }
     }
 
-    public static double[] linspace(double a, double b, int points) {
-        double max = Math.max(a, b);
-        double min = Math.min(a, b);
-        double[] d = new double[points];
-        for (int i = 0; i < points; i++){
-            d[i] = min + i * (max - min) / (points - 1);
-        }
-        return d;
-    }
-
     public void bounce(ArrayList<Double> walls){
-        for (int i = 0; i < walls.size() - 3; i+=4){
-            double x1 = walls.get(i);
-            double y1 = walls.get(i+1);
-            double x2 = walls.get(i+2);
-            double y2 = walls.get(i+3);
+        for (int i = 0; i < walls.size()/4; i++){
+            double x1 = walls.get(4*i);
+            double y1 = walls.get(4*i+1);
+            double x2 = walls.get(4*i+2);
+            double y2 = walls.get(4*i+3);
 
-            // double[] xs = linspace(x1, x2, 1000);
-            // double[] ys = linspace(y1, y2, 1000);
-
-            double[] coordinates = this.isColliding(x1,y2,x2,y2);
-            if ( coordinates != null){
-                System.out.println("hit wall");
-                Vector vectorWall = new Vector(x2 - coordinates[0], y2 - coordinates[1], 0);
-                Vector vectorProjected = (vectorWall.normalize()).crossProduct(velocity.dotProduct(vectorWall.normalize()));
+            Vector offset = this.isColliding(x1,y1,x2,y2);
+            if ( offset != null){
+                this.position = position.add(offset);
+                Vector wall_start = new Vector(x1, y1, 0);
+                Vector wall_end = new Vector(x2, y2, 0);
+                Vector wall = wall_end.add(wall_start.negative());
+                Vector vectorProjected = (wall.normalize()).crossProduct(velocity.dotProduct(wall.normalize()));
                 Vector vectorParallelToNormal = velocity.add(vectorProjected.negative());
                 vectorParallelToNormal = vectorParallelToNormal.negative();
                 velocity = vectorParallelToNormal.add(vectorProjected);
