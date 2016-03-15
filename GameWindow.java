@@ -21,16 +21,15 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 
 public class GameWindow implements ApplicationListener {
-
-	private Map map;
-
 	private FPSLogger fps;
-
 	private OrthographicCamera cam;
 	private static float VIEWPORT_WIDTH = 100;
 	private ShapeRenderer shapeRenderer;
-
 	private float rotationSpeed;
+
+	private Map map;
+	private GolfBall ball;
+
 
 	@Override
 	public void create() {
@@ -38,6 +37,9 @@ public class GameWindow implements ApplicationListener {
 		String path = "test.json";
 		map = new Map(path);
 		// ========
+		Vector startingPos = new Vector(30, 30, 0);
+		Vector velocity = new Vector(20, 10, 0);
+		ball = new GolfBall(startingPos, velocity, 2, 1, this.map);
 
 
 		fps = new FPSLogger();
@@ -104,6 +106,12 @@ public class GameWindow implements ApplicationListener {
 
 	@Override
 	public void render() {
+
+
+		this.ball.update(1f/60f);
+
+
+
 		cam.update();
 
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
@@ -111,6 +119,7 @@ public class GameWindow implements ApplicationListener {
 		shapeRenderer.setProjectionMatrix(cam.combined);
 
 		shapeRenderer.begin(ShapeType.Line);
+		// walls
 		shapeRenderer.setColor(1, 1, 1, 1);
 		ArrayList<Double> walls = map.getWalls();
 		for (int i = 0; i < walls.size()/4; i++) {
@@ -120,7 +129,13 @@ public class GameWindow implements ApplicationListener {
 			double y2 = walls.get(4*i+3);
 			shapeRenderer.line((float)x1, (float)y1, (float)x2, (float)y2);
 		}
+		// border
 		shapeRenderer.rect(0, 0, (float)map.getWidth(), (float)map.getHeight());
+		// ball
+		shapeRenderer.setColor(1, 0, 0, 1);
+		Vector pos = ball.getPosition();
+		shapeRenderer.circle((float)pos.getX(), (float)pos.getY(), (float)ball.getRadius(), 20);
+
 		shapeRenderer.end();
 
 		// shapeRenderer.begin(ShapeType.Filled);
