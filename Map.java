@@ -46,9 +46,13 @@ public class Map {
 		// System.out.println(walls);
 	}
 
-	public ArrayList<Double> getWalls(){
-		return walls;
-	}
+	public String getName(){ return name; }
+	public String getDescription(){ return desc; }
+	public double getWidth(){ return width; }
+	public double getHeight(){ return height; }
+	public ArrayList<Double> getWalls(){ return walls; }
+
+
 
 	public static void main(String[] args) {
 		Map m = new Map("test.json");
