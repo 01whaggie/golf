@@ -37,9 +37,9 @@ public class GameWindow implements ApplicationListener {
 		String path = "test.json";
 		map = new Map(path);
 		// ========
-		Vector startingPos = new Vector(30, 30, 0);
-		Vector velocity = new Vector(20, 10, 0);
-		double radius = 1;
+		Vector3D startingPos = new Vector3D(30, 30, 0);
+		Vector3D velocity = new Vector3D(80, 50, 0);
+		double radius = 0.5;
 		ball = new GolfBall(startingPos, velocity, radius, 1, this.map);
 
 
@@ -134,8 +134,8 @@ public class GameWindow implements ApplicationListener {
 		shapeRenderer.rect(0, 0, (float)map.getWidth(), (float)map.getHeight());
 		// ball
 		shapeRenderer.setColor(1, 0, 0, 1);
-		Vector pos = ball.getPosition();
-		shapeRenderer.circle((float)pos.getX(), (float)pos.getY(), (float)ball.getRadius(), 20);
+		Vector3D pos = ball.getPosition();
+		shapeRenderer.circle((float)pos.x, (float)pos.y, (float)ball.getRadius(), 20);
 
 		shapeRenderer.end();
 
