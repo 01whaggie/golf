@@ -5,7 +5,7 @@ import java.util.ArrayList;
  */
 public class GolfBall {
 
-    private static double FRICTION_COEFFICIENT = 1.5;
+    private static double FRICTION_COEFFICIENT = 3;
     private static double BOUNCE_COEFFICIENT = 0.95;
 
     //private double angle;
