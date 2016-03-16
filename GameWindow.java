@@ -34,10 +34,10 @@ public class GameWindow implements ApplicationListener {
 	@Override
 	public void create() {
 		// Load Map
-		String path = "test.json";
+		String path = "new.json";
 		map = new Map(path);
 		// ========
-		Vector3D startingPos = new Vector3D(30, 30, 0);
+		Vector3D startingPos = map.getStartPosition(); //new Vector3D(30, 30, 0);
 		Vector3D velocity = new Vector3D(40, 25, 0);
 		double radius = 0.5;
 		ball = new GolfBall(startingPos, velocity, radius, 1, this.map);
@@ -120,6 +120,9 @@ public class GameWindow implements ApplicationListener {
 		shapeRenderer.setProjectionMatrix(cam.combined);
 
 		shapeRenderer.begin(ShapeType.Line);
+		// border
+		shapeRenderer.setColor(0.3f, 0.3f, 0.3f, 1);
+		shapeRenderer.rect(0, 0, (float)map.getWidth(), (float)map.getHeight());
 		// walls
 		shapeRenderer.setColor(1, 1, 1, 1);
 		ArrayList<Double> walls = map.getWalls();
@@ -130,12 +133,15 @@ public class GameWindow implements ApplicationListener {
 			double y2 = walls.get(4*i+3);
 			shapeRenderer.line((float)x1, (float)y1, (float)x2, (float)y2);
 		}
-		// border
-		shapeRenderer.rect(0, 0, (float)map.getWidth(), (float)map.getHeight());
+		// hole
+		shapeRenderer.setColor(0, 1, 0.2f, 1);
+		Vector3D holepos = map.getHolePosition();
+		double radius = map.getHoleRadius();
+		shapeRenderer.circle((float)holepos.x, (float)holepos.y, (float)radius, 20);
 		// ball
 		shapeRenderer.setColor(1, 0, 0, 1);
-		Vector3D pos = ball.getPosition();
-		shapeRenderer.circle((float)pos.x, (float)pos.y, (float)ball.getRadius(), 20);
+		Vector3D ballpos = ball.getPosition();
+		shapeRenderer.circle((float)ballpos.x, (float)ballpos.y, (float)ball.getRadius(), 20);
 
 		shapeRenderer.end();
 

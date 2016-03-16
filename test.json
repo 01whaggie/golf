@@ -3,6 +3,8 @@
 	"desc": "Sample map",
 	"width": 100,
 	"height": 100,
+	"start": [30,30],
+	"hole": [70,70,2],
 	"walls": 
 	[
 		[20,40, 20,20],

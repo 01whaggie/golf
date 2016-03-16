@@ -7,11 +7,16 @@ public class Map {
 
 	String path, name, desc;
 	double width, height;
+	Vector3D startpos, holepos;
+	double holeRadius;
 	ArrayList<Double> walls;
 
 	Map(){
 		this.width = 100;
 		this.height = 100;
+		this.startpos = new Vector3D(20, 50);
+		this.holepos = new Vector3D(80, 50);
+		this.holeRadius = 2.0;
 		this.walls = new ArrayList<>();
 	}
 
@@ -29,6 +34,18 @@ public class Map {
 			this.desc = obj.getJsonString("desc").getString();
 			this.width = obj.getJsonNumber("width").doubleValue();
 			this.height = obj.getJsonNumber("height").doubleValue();
+
+			JsonArray start = obj.getJsonArray("start");
+			double startX = start.getJsonNumber(0).doubleValue();
+			double startY = start.getJsonNumber(1).doubleValue();
+			this.startpos = new Vector3D(startX, startY);
+
+			JsonArray hole = obj.getJsonArray("hole");
+			double holeX = hole.getJsonNumber(0).doubleValue();
+			double holeY = hole.getJsonNumber(1).doubleValue();
+			double radius = hole.getJsonNumber(2).doubleValue();
+			this.holepos = new Vector3D(holeX, holeY);
+			this.holeRadius = radius;
 
 			JsonArray arr = obj.getJsonArray("walls");
 			this.walls = new ArrayList<Double>();
@@ -50,16 +67,20 @@ public class Map {
 	}
 
 	public void store(String path){
-		// JsonObject obj = new JsonObject();
-		// obj.put("name", this.name);
-		// obj.put("desc", this.desc);
-		// obj.put("width", new Double(this.width));
-		// obj.put("height", new Double(this.height));
-		// JsonArray arr = new JsonArray();
-		// obj.put("walls", new Double(1000.21));
-		// obj.put("is_vip", new Boolean(true));
 		this.path = path;
 
+		// start pos
+		JsonArrayBuilder start = Json.createArrayBuilder();
+		start.add(startpos.x);
+		start.add(startpos.y);
+
+		// hole
+		JsonArrayBuilder hole = Json.createArrayBuilder();
+		hole.add(holepos.x);
+		hole.add(holepos.y);
+		hole.add(holeRadius);
+
+		// walls
 		JsonArrayBuilder arr = Json.createArrayBuilder();
 		for (int i = 0; i < this.walls.size()/4; i++) {
 			JsonArrayBuilder segment = Json.createArrayBuilder();
@@ -81,6 +102,8 @@ public class Map {
 			.add("desc", this.desc)
 			.add("width", this.width)
 			.add("height", this.height)
+			.add("start", start.build())
+			.add("hole", hole.build())
 			.add("walls", arr.build())
 			.build();
 
@@ -101,12 +124,18 @@ public class Map {
 	public String getDescription(){ return desc; }
 	public double getWidth(){ return width; }
 	public double getHeight(){ return height; }
+	public Vector3D getStartPosition(){ return startpos; }
+	public Vector3D getHolePosition(){ return holepos; }
+	public double getHoleRadius(){ return holeRadius; }
 	public ArrayList<Double> getWalls(){ return walls; }
 
 	public void setName(String name){ this.name = name; }
 	public void setDescription(String desc){ this.desc = desc; }
 	public void setWidth(double width){ this.width = width; }
 	public void setHeight(double height){ this.height = height; }
+	public void setStartPosition(Vector3D pos){ this.startpos = pos; }
+	public void setHolePosition(Vector3D pos){ this.holepos = pos; }
+	public void setHoleRadius(double r){ this.holeRadius = r; }
 	public void addWall(double x1, double y1, double x2, double y2){ 
 		this.walls.add(x1);
 		this.walls.add(y1);
@@ -121,6 +150,8 @@ public class Map {
 		r += "desc = " + desc + "\n";
 		r += "width = " + width + "\n";
 		r += "height = " + height + "\n";
+		r += "start = " + startpos.x + ", " + startpos.y + "\n";
+		r += "hole = " + holepos.x + ", " + holepos.y + " (r=" + holeRadius + ")\n";
 		r += "walls = [\n";
 		for (int i = 0; i < walls.size()/4; i++) {
 			r += "    [";
@@ -141,13 +172,13 @@ public class Map {
 		Map newMap = new Map();
 		newMap.setName("writeTest");
 		newMap.setDescription("something something ...");
+		newMap.setStartPosition(new Vector3D(20, 10));
+		newMap.setHolePosition(new Vector3D(80, 60));
+		newMap.setHoleRadius(2);
 		newMap.addWall(0, 0, 100, 100);
 		newMap.addWall(0, 0, 100, 0);
 		newMap.addWall(100, 0, 100, 100);
 
 		newMap.store("new.json");
-
-
-
 	}
 }
