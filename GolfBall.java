@@ -30,6 +30,10 @@ public class GolfBall {
     public double getRadius() { return radius; }
     public double getMass() { return mass; }
 
+    public void addVelocity(Vector3D dv){
+        this.velocity.add(dv);
+    }
+
     public void update(double deltaTime){
         // doing this will make the physics slower, but also more stable
         // by increasing the steps the stability increases, as does the run-time
@@ -65,6 +69,27 @@ public class GolfBall {
         dx.mult(deltaTime);
         position.add(dx);
 
+        boundsCheck();
+
+    }
+
+    public void boundsCheck(){
+        if(position.x < 0){
+            position.x = 0;
+            velocity.x = 0;
+        }
+        if(position.x > map.getWidth()){
+            position.x = map.getWidth();
+            velocity.x = 0;
+        }
+         if(position.y < 0){
+            position.y = 0;
+            velocity.y = 0;
+        }
+        if(position.y > map.getHeight()){
+            position.y = map.getHeight();
+            velocity.y = 0;
+        }
     }
 
     public boolean isInside(double x, double y){
