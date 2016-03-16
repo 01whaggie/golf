@@ -3,6 +3,8 @@ import java.util.ArrayList;
 
 
 import com.badlogic.gdx.ApplicationListener;
+import com.badlogic.gdx.Game;
+import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputProcessor;
@@ -20,8 +22,9 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer.*;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 
-public class GameWindow implements ApplicationListener {
-	private FPSLogger fps;
+public class GameScreen implements Screen, InputProcessor {
+	private Game game;
+
 	private OrthographicCamera cam;
 	private static float VIEWPORT_WIDTH = 100;
 	private ShapeRenderer shapeRenderer;
@@ -31,19 +34,19 @@ public class GameWindow implements ApplicationListener {
 	private GolfBall ball;
 
 
-	@Override
-	public void create() {
+	
+	public GameScreen(Game game) {
+		this.game = game;
+
 		// Load Map
-		String path = "new.json";
+		String path = "test.json";
 		map = new Map(path);
 		// ========
 		Vector3D startingPos = map.getStartPosition(); //new Vector3D(30, 30, 0);
-		Vector3D velocity = new Vector3D(40, 25, 0);
+		Vector3D velocity = new Vector3D(40, 20, 0);
 		double radius = 0.5;
 		ball = new GolfBall(startingPos, velocity, radius, 1, this.map);
 
-
-		fps = new FPSLogger();
 
 		rotationSpeed = 0.5f;
 
@@ -59,42 +62,10 @@ public class GameWindow implements ApplicationListener {
 
 		shapeRenderer = new ShapeRenderer();
 
-		InputProcessor myInputProcessor = new InputAdapter(){
-			public boolean scrolled(int amount){
-				cam.zoom += 0.02*amount;
-				updateCamera();
-
-				return false;
-			}
-			public boolean keyDown(int key){
-				if (key == Input.Keys.LEFT || key == Input.Keys.A) {
-					cam.translate(-3, 0, 0);
-				}
-				if (key == Input.Keys.RIGHT || key == Input.Keys.D) {
-					cam.translate(3, 0, 0);
-				}
-				if (key == Input.Keys.DOWN || key == Input.Keys.S) {
-					cam.translate(0, -3, 0);
-				}
-				if (key == Input.Keys.UP || key == Input.Keys.W) {
-					cam.translate(0, 3, 0);
-				}
-				if (key == Input.Keys.Q) {
-					cam.rotate(-rotationSpeed, 0, 0, 1);
-				}
-				if (key == Input.Keys.E) {
-					cam.rotate(rotationSpeed, 0, 0, 1);
-				}
-
-				updateCamera();
-
-				return false;
-			}
-		};
-		Gdx.input.setInputProcessor(myInputProcessor);
+		Gdx.input.setInputProcessor(this);
 	}
 
-	public void updateCamera(){
+	private void updateCamera(){
 		cam.zoom = MathUtils.clamp(cam.zoom, 0.1f, 100/cam.viewportWidth*2);
 
 		float effectiveViewportWidth = cam.viewportWidth * cam.zoom;
@@ -106,11 +77,10 @@ public class GameWindow implements ApplicationListener {
 	}
 
 	@Override
-	public void render() {
+	public void render(float delta) {
 
-
-		this.ball.update(1f/60f);
-
+		// this.ball.update(1f/60f);
+		this.ball.update(delta);
 
 
 		cam.update();
@@ -150,9 +120,6 @@ public class GameWindow implements ApplicationListener {
 		// shapeRenderer.rect(x, y, width, height);
 		// shapeRenderer.circle(x, y, radius);
 		// shapeRenderer.end();
-
-		fps.log();
-
 	}
 
 	@Override
@@ -161,6 +128,64 @@ public class GameWindow implements ApplicationListener {
 		cam.viewportHeight = VIEWPORT_WIDTH * height/width;
 		cam.update();
 	}
+	
+	// INPUT
+	public boolean keyDown(int key){
+		if (key == Input.Keys.LEFT || key == Input.Keys.A) {
+			cam.translate(-3, 0, 0);
+		}
+		if (key == Input.Keys.RIGHT || key == Input.Keys.D) {
+			cam.translate(3, 0, 0);
+		}
+		if (key == Input.Keys.DOWN || key == Input.Keys.S) {
+			cam.translate(0, -3, 0);
+		}
+		if (key == Input.Keys.UP || key == Input.Keys.W) {
+			cam.translate(0, 3, 0);
+		}
+		if (key == Input.Keys.Q) {
+			cam.rotate(-rotationSpeed, 0, 0, 1);
+		}
+		if (key == Input.Keys.E) {
+			cam.rotate(rotationSpeed, 0, 0, 1);
+		}
+
+		updateCamera();
+
+		return false;
+	}
+
+	public boolean keyTyped(char character){
+		return false;
+	}
+
+	public boolean keyUp(int key){
+		return false;
+	}
+
+	public boolean mouseMoved(int screenX, int screenY){
+		return false;
+	}
+
+	public boolean scrolled(int amount){
+		cam.zoom += 0.02*amount;
+		updateCamera();
+
+		return false;
+	}
+
+	public boolean touchDown(int screenX, int screenY, int pointer, int button){
+		return false;
+	}
+
+	public boolean touchDragged(int screenX, int screenY, int pointer){
+		return false;
+	}
+
+	public boolean touchUp(int screenX, int screenY, int pointer, int button){
+		return false;
+	}
+	// !INPUT
 
 	@Override
 	public void resume() {
@@ -174,15 +199,11 @@ public class GameWindow implements ApplicationListener {
 	public void pause() {
 	}
 
-	public static void main(String[] args) {
-		LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
-		config.width = 800;
-		config.height = 600;
-		config.x = -1; //center
-		config.y = -1; // center
-		config.title = "Lots of fancy boxes!";
-		config.samples = 4;
+	@Override
+	public void hide(){
+	}
 
-		new LwjglApplication(new GameWindow(), config);
+	@Override
+	public void show(){
 	}
 }
