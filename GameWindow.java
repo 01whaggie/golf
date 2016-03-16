@@ -38,7 +38,7 @@ public class GameWindow implements ApplicationListener {
 		map = new Map(path);
 		// ========
 		Vector3D startingPos = new Vector3D(30, 30, 0);
-		Vector3D velocity = new Vector3D(80, 50, 0);
+		Vector3D velocity = new Vector3D(40, 25, 0);
 		double radius = 0.5;
 		ball = new GolfBall(startingPos, velocity, radius, 1, this.map);
 
