@@ -27,6 +27,7 @@ import com.badlogic.gdx.utils.Align;
 import java.util.ArrayList;
 import java.io.*;
 import java.net.*;
+import java.lang.Math;
 
 public class GameScreen implements Screen, InputProcessor {
 	private Game game;
@@ -43,6 +44,7 @@ public class GameScreen implements Screen, InputProcessor {
 
 	private boolean colorMode = false;
 	private boolean editMode = false;
+	private boolean snapToGrid = false;
 
 	private ShapeRenderer shapeRenderer;
 	private SpriteBatch spriteBatch;
@@ -309,6 +311,9 @@ public class GameScreen implements Screen, InputProcessor {
 		if (key == Input.Keys.BACKSPACE && editMode) {
 			map.removeLastWall();
 		}
+		if (key == Input.Keys.G && editMode) {
+			snapToGrid = !snapToGrid;
+		}
 		if (key == Input.Keys.ENTER) {
 			if(editMode){
 				TextInputListener textListener = new TextInputListener(){
@@ -337,7 +342,11 @@ public class GameScreen implements Screen, InputProcessor {
 			colorMode = !colorMode;
 		}
 		if (key == Input.Keys.R) {
-			ball.reset();
+			if(editMode){
+				loadMap("empty.json");
+			}else{
+				ball.reset();
+			}
 		}
 
 		updateCamera();
@@ -364,11 +373,19 @@ public class GameScreen implements Screen, InputProcessor {
 		return false;
 	}
 
+	public float roundToGrid(float x, float gridsize){
+		return Math.round(x/gridsize)*gridsize;
+	}
+
 	public boolean touchDown(int screenX, int screenY, int pointer, int button){
 		if(button == 0){
 			draggingLeft = true;
 			if(editMode){
 				wallStartPos = cam.unproject(new Vector3(screenX, screenY, 0));
+				if(snapToGrid){
+					wallStartPos.x = roundToGrid(wallStartPos.x, 2.5f);
+					wallStartPos.y = roundToGrid(wallStartPos.y, 2.5f);
+				}
 			}
 		}
 		if(button == 1){
@@ -404,8 +421,16 @@ public class GameScreen implements Screen, InputProcessor {
 			float holedist = holepos.dst(mousepos);
 			float startdist = startpos.dst(mousepos);
 			if(holedist < snapdist){
+				if(snapToGrid){
+					mousepos.x = roundToGrid(mousepos.x, 2.5f);
+					mousepos.y = roundToGrid(mousepos.y, 2.5f);
+				}
 				map.setHolePosition(new Vector3D(mousepos.x, mousepos.y, 0));
 			}else if(startdist < snapdist){
+				if(snapToGrid){
+					mousepos.x = roundToGrid(mousepos.x, 2.5f);
+					mousepos.y = roundToGrid(mousepos.y, 2.5f);
+				}
 				map.setStartPosition(new Vector3D(mousepos.x, mousepos.y, 0));
 			}
 		}
@@ -426,6 +451,10 @@ public class GameScreen implements Screen, InputProcessor {
 			}else{
 				// add line to map here ...
 				Vector3 endpos = cam.unproject(new Vector3(screenX, screenY, 0));
+				if(snapToGrid){
+					endpos.x = roundToGrid(endpos.x, 2.5f);
+					endpos.y = roundToGrid(endpos.y, 2.5f);
+				}
 				map.addWall(wallStartPos.x, wallStartPos.y, endpos.x, endpos.y);
 				wallStartPos.set(-1,-1,0);
 			}

@@ -16,7 +16,7 @@ public class Map {
 		this.height = 100;
 		this.startpos = new Vector3D(20, 50);
 		this.holepos = new Vector3D(80, 50);
-		this.holeRadius = 2.0;
+		this.holeRadius = 1.0;
 		this.walls = new ArrayList<>();
 	}
 

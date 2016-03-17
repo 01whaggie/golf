@@ -1,0 +1,9 @@
+{
+	"name": "empty",
+	"desc": "empty map",
+	"width": 100,
+	"height": 100,
+	"start": [20,50],
+	"hole": [80,50,1],
+	"walls": []
+}
