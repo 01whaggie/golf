@@ -1,4 +1,3 @@
-import java.util.Scanner;
 import java.util.ArrayList;
 
 
@@ -24,6 +23,9 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 
+import java.io.*;
+import java.net.*;
+
 public class GameScreen implements Screen, InputProcessor {
 	private Game game;
 
@@ -39,6 +41,9 @@ public class GameScreen implements Screen, InputProcessor {
 
 	private Map map;
 	private GolfBall ball;
+	private Vector3D prevPosition;
+	private Vector3D newPosition;
+	private String ipAddress;
 
 
 	
@@ -50,6 +55,8 @@ public class GameScreen implements Screen, InputProcessor {
 		map = new Map(path);
 		// ========
 		Vector3D startingPos = map.getStartPosition(); //new Vector3D(30, 30, 0);
+		prevPosition = new Vector3D(0, 0, 0);
+		newPosition = new Vector3D(40, 40, 0);
 		Vector3D velocity = new Vector3D(10, 5, 0);
 		double radius = 0.5;
 		ball = new GolfBall(startingPos, velocity, radius, 1, this.map);
@@ -71,6 +78,9 @@ public class GameScreen implements Screen, InputProcessor {
 		shapeRenderer = new ShapeRenderer();
 
 		Gdx.input.setInputProcessor(this);
+
+		ipAddress = readIPAddress();
+		createClientThread();
 	}
 
 	private void updateCamera(){
@@ -120,7 +130,7 @@ public class GameScreen implements Screen, InputProcessor {
 		double radius = map.getHoleRadius();
 		shapeRenderer.circle((float)holepos.x, (float)holepos.y, (float)radius, 20);
 		// line between mouse and ball when dragging
-		if(draggingLeft && lastLeftMousePos.x != -1 && lastLeftMousePos.y != -1){
+		if ((draggingLeft && lastLeftMousePos.x != -1 && lastLeftMousePos.y != -1)){
 			shapeRenderer.setColor(1, 1, 0, 1);
 			Vector3 mouseInWorld = cam.unproject(new Vector3(lastLeftMousePos, 0));
 			shapeRenderer.line((float)ballpos.x, (float)ballpos.y, (float)mouseInWorld.x, (float)mouseInWorld.y);
@@ -235,7 +245,71 @@ public class GameScreen implements Screen, InputProcessor {
 		}
 		return false;
 	}
-	// !INPUT
+
+
+	public boolean hitBall(float deltaX, float deltaY){
+			// 'hit' the ball
+			Vector3D dx = new Vector3D(deltaX, deltaY, 0);
+			dx.sub(prevPosition);
+			dx.mult(-1);
+			// multiply to scale velocity
+			dx.mult(3);
+			ball.addVelocity(dx);
+		return false;
+	}
+
+	private String readIPAddress() {
+
+		String result = "127.0.0.1";
+
+		try {
+			BufferedReader br = new BufferedReader(new FileReader("ip.ini"));
+			StringBuilder sb = new StringBuilder();
+			String line = br.readLine();
+
+			while (line != null) {
+				sb.append(line);
+				line = br.readLine();
+			}
+			result = sb.toString();
+		}
+		catch (Exception ex) {
+		}
+
+		return result;
+	}
+
+
+
+	private void createClientThread() {
+
+		Thread thread = new Thread() {
+			public void run() {
+				String sentence;
+				String modifiedSentence;
+
+				while (true) {
+					try {
+						BufferedReader inFromUser = new BufferedReader(new InputStreamReader(System.in));
+						Socket clientSocket = new Socket(ipAddress, 7544);
+						DataOutputStream outToServer = new DataOutputStream(clientSocket.getOutputStream());
+						BufferedReader inFromServer = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+						sentence = "getCoords";
+						outToServer.writeBytes(sentence + '\n');
+						modifiedSentence = inFromServer.readLine();
+						String[] coords = modifiedSentence.split(";");
+
+						hitBall(Float.parseFloat(coords[0]), Float.parseFloat(coords[1]));
+						clientSocket.close();
+					} catch (Exception ex) {
+						System.out.println(ex.getMessage());
+					}
+				}
+			}
+		};
+
+		thread.start();
+	}
 
 	@Override
 	public void resume() {
