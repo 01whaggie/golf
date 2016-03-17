@@ -1,6 +1,3 @@
-import java.util.ArrayList;
-
-
 import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Screen;
@@ -17,13 +14,16 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.*;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
+import com.badlogic.gdx.files.FileHandle;
 
+import java.util.ArrayList;
 import java.io.*;
 import java.net.*;
 
@@ -39,6 +39,8 @@ public class GameScreen implements Screen, InputProcessor {
 	private float rotationSpeed;
 
 	private ShapeRenderer shapeRenderer;
+	SpriteBatch spriteBatch;
+	BitmapFont font;
 
 	private Map map;
 	private GolfBall ball;
@@ -80,6 +82,8 @@ public class GameScreen implements Screen, InputProcessor {
 		cam.update();
 
 		shapeRenderer = new ShapeRenderer();
+		spriteBatch = new SpriteBatch();
+		font = new BitmapFont(new FileHandle("./warnock.fnt"));
 
 		Gdx.input.setInputProcessor(this);
 
@@ -184,6 +188,14 @@ public class GameScreen implements Screen, InputProcessor {
 		shapeRenderer.setColor(0.5f, 0.5f, 0.5f, 1);
 		shapeRenderer.circle((float)ballpos.x, (float)ballpos.y, (float)ball.getRadius(), 20);
 		shapeRenderer.end();
+
+		float w = Gdx.graphics.getWidth();
+		float h = Gdx.graphics.getHeight();
+
+		spriteBatch.begin();
+		font.getData().setScale(1f);
+		font.draw(spriteBatch, "Test", 10, h-10);
+		spriteBatch.end();
 	}
 
 	@Override
@@ -340,7 +352,7 @@ public class GameScreen implements Screen, InputProcessor {
 						hitBall(Float.parseFloat(coords[0]), Float.parseFloat(coords[1]));
 						clientSocket.close();
 					} catch (Exception ex) {
-						System.out.println(ex.getMessage());
+						// System.out.println(ex.getMessage());
 					}
 				}
 			}
