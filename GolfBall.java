@@ -14,6 +14,9 @@ public class GolfBall {
     private Vector3D velocity;
     private double radius;
     private double mass;
+    private int score;
+    public enum State{PLAYING, START, HOLE};
+    private State state;
 
     private Map map;
 
@@ -22,6 +25,7 @@ public class GolfBall {
         this.velocity = velocity;
         this.radius = radius;
         this.mass = mass;
+        this.state = State.START;
 
         this.map = map;
     }
@@ -30,6 +34,10 @@ public class GolfBall {
     public Vector3D getPosition() { return position; }
     public double getRadius() { return radius; }
     public double getMass() { return mass; }
+    public State getState() { return state; }
+    public int getScore() { return score; }
+
+    public void addScore(){ score++; }
 
     public void addVelocity(Vector3D dv){
         this.velocity.add(dv);
@@ -79,6 +87,8 @@ public class GolfBall {
     public void kick(Vector3D dv){
         dv.limit(MAX_KICK_SPEED);
         this.velocity.add(dv);
+        this.addScore();
+        this.state = State.PLAYING;
     }
 
     public void puttingCheck(double dt){
@@ -99,6 +109,7 @@ public class GolfBall {
             if (/*holeDist.len() < (radiusHole-radius) && */(velocity.len() < 0.5)) {
                 this.position.setXYZ(holePosition.x, holePosition.y, holePosition.z);
                 this.velocity.setXYZ(0, 0 ,0);
+                state = State.HOLE;
             }
         }
     }
@@ -184,6 +195,14 @@ public class GolfBall {
             }
 
         }
+    }
+
+    public void reset(){
+        this.position.setX(map.getStartPosition().x);
+        this.position.setY(map.getStartPosition().y);
+        this.velocity = new Vector3D(0,0,0);
+        this.score = 0;
+        state = State.START;
     }
 
     public String toString(){

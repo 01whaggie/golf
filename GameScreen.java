@@ -22,6 +22,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.files.FileHandle;
+import com.badlogic.gdx.utils.Align;
 
 import java.util.ArrayList;
 import java.io.*;
@@ -38,9 +39,12 @@ public class GameScreen implements Screen, InputProcessor {
 	private static float VIEWPORT_HEIGHT = 100;
 	private float rotationSpeed;
 
+	private boolean colorMode = false;
+	private boolean editMode = false;
+
 	private ShapeRenderer shapeRenderer;
-	SpriteBatch spriteBatch;
-	BitmapFont font;
+	private SpriteBatch spriteBatch;
+	private BitmapFont font;
 
 	private Map map;
 	private GolfBall ball;
@@ -88,8 +92,8 @@ public class GameScreen implements Screen, InputProcessor {
 		Gdx.input.setInputProcessor(this);
 
 
-		ipAddress = readIPAddress();
-		createClientThread();
+		// ipAddress = readIPAddress();
+		// createClientThread();
 
 		// TextInputListener textListener = new TextInputListener(){
 		// 	public void input (String text) {
@@ -123,19 +127,30 @@ public class GameScreen implements Screen, InputProcessor {
 		this.ball.update(delta);
 
 		cam.update();
-
-		// Gdx.gl.glClearColor(0.4f, 0.4f, 0.8f, 1);
+		if(colorMode){
+			Gdx.gl.glClearColor(1f, 0.950f, 0.941f, 1f);
+		}else{
+			Gdx.gl.glClearColor(0f, 0f, 0f, 1);
+		}
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
 		shapeRenderer.setProjectionMatrix(cam.combined);
 
 		shapeRenderer.begin(ShapeType.Line);
 		// border
-		shapeRenderer.setColor(0.3f, 0.3f, 0.3f, 1);
+		if(colorMode){
+			shapeRenderer.setColor(0.412f, 0.412f, 0.412f, 1f);
+		}else{
+			shapeRenderer.setColor(0.3f, 0.3f, 0.3f, 1);
+		}
 		shapeRenderer.rect(0, 0, (float)map.getWidth(), (float)map.getHeight());
 		// grid
 		float sep = 2.5f;
-		shapeRenderer.setColor(0.05f, 0.05f, 0.05f, 1);
+		if(colorMode){
+			shapeRenderer.setColor(0.9f, 0.9f, 0.9f, 1f);
+		}else{
+			shapeRenderer.setColor(0.05f, 0.05f, 0.05f, 1);
+		}
 		for (float x = sep; x <= map.getWidth()-sep; x+=sep) {
 			shapeRenderer.line(x, 0, x, (float)map.getHeight());
 		}
@@ -143,7 +158,11 @@ public class GameScreen implements Screen, InputProcessor {
 			shapeRenderer.line(0, y, (float)map.getWidth(), y);
 		}
 		sep = 5f;
-		shapeRenderer.setColor(0.1f, 0.1f, 0.1f, 1);
+		if(colorMode){
+			shapeRenderer.setColor(0.863f, 0.863f, 0.863f, 1f);
+		}else{
+			shapeRenderer.setColor(0.1f, 0.1f, 0.1f, 1);
+		}
 		for (float x = sep; x <= map.getWidth()-sep; x+=sep) {
 			shapeRenderer.line(x, 0, x, (float)map.getHeight());
 		}
@@ -152,7 +171,11 @@ public class GameScreen implements Screen, InputProcessor {
 		}
 		
 		// walls
-		shapeRenderer.setColor(1, 1, 1, 1);
+		if(colorMode){
+			shapeRenderer.setColor(0f, 0.749f, 1f, 1f);
+		}else{
+			shapeRenderer.setColor(1, 1, 1, 1);
+		}
 		ArrayList<Double> walls = map.getWalls();
 		for (int i = 0; i < walls.size()/4; i++) {
 			double x1 = walls.get(4*i+0);
@@ -163,38 +186,79 @@ public class GameScreen implements Screen, InputProcessor {
 		}
 		Vector3D ballpos = ball.getPosition();
 		// hole
-		shapeRenderer.setColor(0.2f, 0.6f, 0.2f, 1);
+		if(colorMode){
+			shapeRenderer.setColor(1f, 0.412f, 0.706f, 1);
+		}else{
+			shapeRenderer.setColor(0.2f, 0.6f, 0.2f, 1);
+		}
 		Vector3D holepos = map.getHolePosition();
 		double radius = map.getHoleRadius();
 		shapeRenderer.circle((float)holepos.x, (float)holepos.y, (float)radius, 20);
 		// start position
-		shapeRenderer.setColor(0.5f, 0.5f, 0.5f, 1);
+		if(colorMode){
+			shapeRenderer.setColor(0.863f, 0.863f, 0.863f, 1f);
+		}else{
+			shapeRenderer.setColor(0.3f, 0.3f, 0.3f, 1);
+		}
 		Vector3D startPos = map.getStartPosition();
 		float r = 1.25f;
 		shapeRenderer.line((float)startPos.x-r, (float)startPos.y-r, (float)startPos.x+r, (float)startPos.y+r);
 		shapeRenderer.line((float)startPos.x-r, (float)startPos.y+r, (float)startPos.x+r, (float)startPos.y-r);
-		// line between mouse and ball when dragging
-		if ((draggingLeft && lastLeftMousePos.x != -1 && lastLeftMousePos.y != -1)){
-			shapeRenderer.setColor(1, 1, 0, 1);
-			Vector3 mouseInWorld = cam.unproject(new Vector3(lastLeftMousePos, 0));
-			Vector3 line = mouseInWorld.cpy();
-			line.sub((float)ballpos.x, (float)ballpos.y, 0f);
-			line.limit((float)ball.MAX_KICK_SPEED/5f);
-			shapeRenderer.line((float)ballpos.x, (float)ballpos.y, (float)ballpos.x + line.x/*mouseInWorld.x*/, (float)ballpos.y + line.y/*mouseInWorld.y*/);
+		if(!editMode){
+			// line between mouse and ball when dragging
+			if ((draggingLeft && lastLeftMousePos.x != -1 && lastLeftMousePos.y != -1)){
+				if(colorMode){
+					shapeRenderer.setColor(0f, 0.749f, 1f, 1f);
+				}else{
+					shapeRenderer.setColor(1, 1, 0, 1);
+				}
+				Vector3 mouseInWorld = cam.unproject(new Vector3(lastLeftMousePos, 0));
+				Vector3 line = mouseInWorld.cpy();
+				line.sub((float)ballpos.x, (float)ballpos.y, 0f);
+				line.limit((float)ball.MAX_KICK_SPEED/5f);
+				shapeRenderer.line((float)ballpos.x, (float)ballpos.y, (float)ballpos.x + line.x/*mouseInWorld.x*/, (float)ballpos.y + line.y/*mouseInWorld.y*/);
+			}
+			shapeRenderer.end();
+			shapeRenderer.begin(ShapeType.Filled);
+			// ball
+			if(colorMode){
+				shapeRenderer.setColor(1f, 0.078f, 0.576f, 1);
+			}else{
+				shapeRenderer.setColor(0.7f, 0.7f, 0.7f, 1);
+			}
+			shapeRenderer.circle((float)ballpos.x, (float)ballpos.y, (float)ball.getRadius(), 20);
 		}
-		shapeRenderer.end();
-		shapeRenderer.begin(ShapeType.Filled);
-		// ball
-		shapeRenderer.setColor(0.5f, 0.5f, 0.5f, 1);
-		shapeRenderer.circle((float)ballpos.x, (float)ballpos.y, (float)ball.getRadius(), 20);
 		shapeRenderer.end();
 
 		float w = Gdx.graphics.getWidth();
 		float h = Gdx.graphics.getHeight();
 
 		spriteBatch.begin();
-		font.getData().setScale(1f);
-		font.draw(spriteBatch, "Test", 10, h-10);
+		if(!editMode){
+			font.setColor(1,1,1,1);
+			font.getData().setScale(0.5f);
+			font.draw(spriteBatch, "Hits: " + ball.getScore(), 10, h-10);
+			String stateText = "State: ";
+			switch (ball.getState()) {
+				case PLAYING:
+					stateText += "playing";
+					break;
+				case START:
+					stateText += "starting";
+					break;
+				case HOLE:
+					stateText += "yay!";
+					font.setColor(1,0,1,1);
+					font.getData().setScale(1f);
+					font.draw(spriteBatch, "Success!", 0, h-font.getCapHeight(), w, Align.center, false);
+					break;
+			}
+			// font.draw(spriteBatch, stateText, 10, h-10-font.getCapHeight()-20);
+		}else{
+			font.setColor(1,0,1,1);
+			font.getData().setScale(1f);
+			font.draw(spriteBatch, "Editing Mode", 0, h-font.getCapHeight(), w, Align.center, false);
+		}
 		spriteBatch.end();
 	}
 
@@ -219,11 +283,20 @@ public class GameScreen implements Screen, InputProcessor {
 		if (key == Input.Keys.UP || key == Input.Keys.W) {
 			cam.translate(0, 3, 0);
 		}
-		if (key == Input.Keys.Q) {
-			cam.rotate(-rotationSpeed, 0, 0, 1);
-		}
+		// if (key == Input.Keys.Q) {
+		// 	cam.rotate(-rotationSpeed, 0, 0, 1);
+		// }
+		// if (key == Input.Keys.E) {
+		// 	cam.rotate(rotationSpeed, 0, 0, 1);
+		// }
 		if (key == Input.Keys.E) {
-			cam.rotate(rotationSpeed, 0, 0, 1);
+			editMode = !editMode;
+		}
+		if (key == Input.Keys.C) {
+			colorMode = !colorMode;
+		}
+		if (key == Input.Keys.R) {
+			ball.reset();
 		}
 
 		updateCamera();
