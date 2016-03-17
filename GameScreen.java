@@ -7,6 +7,7 @@ import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.Input.TextInputListener;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
@@ -40,6 +41,7 @@ public class GameScreen implements Screen, InputProcessor {
 	private Map map;
 	private GolfBall ball;
 
+	// private String textIn;
 
 	
 	public GameScreen(Game game) {
@@ -50,7 +52,7 @@ public class GameScreen implements Screen, InputProcessor {
 		map = new Map(path);
 		// ========
 		Vector3D startingPos = map.getStartPosition(); //new Vector3D(30, 30, 0);
-		Vector3D velocity = new Vector3D(10, 5, 0);
+		Vector3D velocity = new Vector3D(0, 0, 0);
 		double radius = 0.5;
 		ball = new GolfBall(startingPos, velocity, radius, 1, this.map);
 
@@ -71,6 +73,15 @@ public class GameScreen implements Screen, InputProcessor {
 		shapeRenderer = new ShapeRenderer();
 
 		Gdx.input.setInputProcessor(this);
+
+		// TextInputListener textListener = new TextInputListener(){
+		// 	public void input (String text) {
+		// 		textIn = text;
+		// 		System.out.println(textIn);
+		// 	}
+		// 	public void canceled () {}
+		// };
+		// Gdx.input.getTextInput(textListener, "Dialog Title", "", "filename");
 	}
 
 	private void updateCamera(){
@@ -95,6 +106,7 @@ public class GameScreen implements Screen, InputProcessor {
 
 		cam.update();
 
+		// Gdx.gl.glClearColor(0.4f, 0.4f, 0.8f, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
 		shapeRenderer.setProjectionMatrix(cam.combined);
@@ -103,6 +115,24 @@ public class GameScreen implements Screen, InputProcessor {
 		// border
 		shapeRenderer.setColor(0.3f, 0.3f, 0.3f, 1);
 		shapeRenderer.rect(0, 0, (float)map.getWidth(), (float)map.getHeight());
+		// grid
+		float sep = 2.5f;
+		shapeRenderer.setColor(0.05f, 0.05f, 0.05f, 1);
+		for (float x = sep; x <= map.getWidth()-sep; x+=sep) {
+			shapeRenderer.line(x, 0, x, (float)map.getHeight());
+		}
+		for (float y = sep; y <= map.getHeight()-sep; y+=sep) {
+			shapeRenderer.line(0, y, (float)map.getWidth(), y);
+		}
+		sep = 5f;
+		shapeRenderer.setColor(0.1f, 0.1f, 0.1f, 1);
+		for (float x = sep; x <= map.getWidth()-sep; x+=sep) {
+			shapeRenderer.line(x, 0, x, (float)map.getHeight());
+		}
+		for (float y = sep; y <= map.getHeight()-sep; y+=sep) {
+			shapeRenderer.line(0, y, (float)map.getWidth(), y);
+		}
+		
 		// walls
 		shapeRenderer.setColor(1, 1, 1, 1);
 		ArrayList<Double> walls = map.getWalls();
@@ -123,7 +153,10 @@ public class GameScreen implements Screen, InputProcessor {
 		if(draggingLeft && lastLeftMousePos.x != -1 && lastLeftMousePos.y != -1){
 			shapeRenderer.setColor(1, 1, 0, 1);
 			Vector3 mouseInWorld = cam.unproject(new Vector3(lastLeftMousePos, 0));
-			shapeRenderer.line((float)ballpos.x, (float)ballpos.y, (float)mouseInWorld.x, (float)mouseInWorld.y);
+			Vector3 line = mouseInWorld.cpy();
+			line.sub((float)ballpos.x, (float)ballpos.y, 0f);
+			line.limit((float)ball.MAX_KICK_SPEED/5f);
+			shapeRenderer.line((float)ballpos.x, (float)ballpos.y, (float)ballpos.x + line.x/*mouseInWorld.x*/, (float)ballpos.y + line.y/*mouseInWorld.y*/);
 		}
 		shapeRenderer.end();
 		shapeRenderer.begin(ShapeType.Filled);
@@ -222,8 +255,7 @@ public class GameScreen implements Screen, InputProcessor {
 			dx.mult(-1);
 			// multiply to scale velocity
 			dx.mult(5);
-			ball.addVelocity(dx);
-
+			ball.kick(dx);
 
 			draggingLeft = false;
 			lastLeftMousePos.set(-1, -1);

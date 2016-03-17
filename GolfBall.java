@@ -5,8 +5,9 @@ import java.util.ArrayList;
  */
 public class GolfBall {
 
-    private static double FRICTION_COEFFICIENT = 3;
+    private static double FRICTION_COEFFICIENT = 10;
     private static double BOUNCE_COEFFICIENT = 0.95;
+    public static double MAX_KICK_SPEED = 50;
 
     //private double angle;
     private Vector3D position;
@@ -65,12 +66,41 @@ public class GolfBall {
             velocity.add(dv);
         }
 
+        puttingCheck(deltaTime);
+
         Vector3D dx = velocity.copy();
         dx.mult(deltaTime);
         position.add(dx);
 
         boundsCheck();
 
+    }
+
+    public void kick(Vector3D dv){
+        dv.limit(MAX_KICK_SPEED);
+        this.velocity.add(dv);
+    }
+
+    public void puttingCheck(double dt){
+        Vector3D holePosition = this.map.getHolePosition();
+        double radiusHole = this.map.getHoleRadius();
+        Vector3D holeDist = Vector3D.sub(position, holePosition);
+        if (holeDist.len() < radiusHole){
+            // this.velocity.mult(0.95);
+            double slow = 300;
+            Vector3D frictionForce = velocity.copy();
+            frictionForce.mult(-1);
+            frictionForce.normalize();
+            frictionForce.mult(slow);
+
+            Vector3D dv = frictionForce.copy();
+            dv.mult(dt);
+            velocity.add(dv);
+            if (/*holeDist.len() < (radiusHole-radius) && */(velocity.len() < 0.5)) {
+                this.position.setXYZ(holePosition.x, holePosition.y, holePosition.z);
+                this.velocity.setXYZ(0, 0 ,0);
+            }
+        }
     }
 
     public void boundsCheck(){
