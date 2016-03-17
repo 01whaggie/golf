@@ -51,7 +51,7 @@ public class GameScreen implements Screen, InputProcessor {
 		String path = "test.json";
 		map = new Map(path);
 		// ========
-		Vector3D startingPos = map.getStartPosition(); //new Vector3D(30, 30, 0);
+		Vector3D startingPos = map.getStartPosition().copy(); //new Vector3D(30, 30, 0);
 		Vector3D velocity = new Vector3D(0, 0, 0);
 		double radius = 0.5;
 		ball = new GolfBall(startingPos, velocity, radius, 1, this.map);
@@ -149,6 +149,12 @@ public class GameScreen implements Screen, InputProcessor {
 		Vector3D holepos = map.getHolePosition();
 		double radius = map.getHoleRadius();
 		shapeRenderer.circle((float)holepos.x, (float)holepos.y, (float)radius, 20);
+		// start position
+		shapeRenderer.setColor(0.5f, 0.5f, 0.5f, 1);
+		Vector3D startPos = map.getStartPosition();
+		float r = 1.25f;
+		shapeRenderer.line((float)startPos.x-r, (float)startPos.y-r, (float)startPos.x+r, (float)startPos.y+r);
+		shapeRenderer.line((float)startPos.x-r, (float)startPos.y+r, (float)startPos.x+r, (float)startPos.y-r);
 		// line between mouse and ball when dragging
 		if(draggingLeft && lastLeftMousePos.x != -1 && lastLeftMousePos.y != -1){
 			shapeRenderer.setColor(1, 1, 0, 1);
