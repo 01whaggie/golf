@@ -107,7 +107,7 @@ public class Map {
 			.add("walls", arr.build())
 			.build();
 
-		System.out.println(obj);
+		// System.out.println(obj);
 		
 		try {
 			JsonWriter writer = Json.createWriter(new FileWriter(path));
@@ -141,6 +141,11 @@ public class Map {
 		this.walls.add(y1);
 		this.walls.add(x2);
 		this.walls.add(y2);
+	}
+	public void removeLastWall(){
+		if(walls.size() >= 4){
+			this.walls.subList(walls.size()-4, walls.size()).clear();
+		}
 	}
 
 	@Override

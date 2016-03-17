@@ -36,8 +36,10 @@ public class GameScreen implements Screen, InputProcessor {
 	private Vector2 lastRightMousePos = new Vector2(-1, -1);
 	private boolean draggingLeft = false;
 	private boolean draggingRight = false;
+	private boolean draggingMiddle = false;
 	private static float VIEWPORT_HEIGHT = 100;
 	private float rotationSpeed;
+	private Vector3 wallStartPos = new Vector3(-1,-1,0);
 
 	private boolean colorMode = false;
 	private boolean editMode = false;
@@ -52,25 +54,14 @@ public class GameScreen implements Screen, InputProcessor {
 	private Vector3D newPosition;
 	private String ipAddress;
 
-	// private String textIn;
+	private String mapFileName;
 
 	
 	public GameScreen(Game game) {
 		this.game = game;
 
 		// Load Map
-		String path = "test.json";
-		map = new Map(path);
-		// ========
-		Vector3D startingPos = map.getStartPosition().copy(); //new Vector3D(30, 30, 0);
-
-		prevPosition = new Vector3D(0, 0, 0);
-		newPosition = new Vector3D(40, 40, 0);
-		Vector3D velocity = new Vector3D(0, 0, 0);
-
-		double radius = 0.5;
-		ball = new GolfBall(startingPos, velocity, radius, 1, this.map);
-
+		loadMap("default.json");
 
 		rotationSpeed = 0.5f;
 
@@ -95,15 +86,18 @@ public class GameScreen implements Screen, InputProcessor {
 		// ipAddress = readIPAddress();
 		// createClientThread();
 
-		// TextInputListener textListener = new TextInputListener(){
-		// 	public void input (String text) {
-		// 		textIn = text;
-		// 		System.out.println(textIn);
-		// 	}
-		// 	public void canceled () {}
-		// };
-		// Gdx.input.getTextInput(textListener, "Dialog Title", "", "filename");
+	}
 
+	private void loadMap(String path){
+		map = new Map(path);
+		Vector3D startingPos = map.getStartPosition().copy(); //new Vector3D(30, 30, 0);
+
+		prevPosition = new Vector3D(0, 0, 0);
+		newPosition = new Vector3D(40, 40, 0);
+		Vector3D velocity = new Vector3D(0, 0, 0);
+
+		double radius = 0.5;
+		ball = new GolfBall(startingPos, velocity, radius, 1, this.map);
 	}
 
 	private void updateCamera(){
@@ -128,7 +122,8 @@ public class GameScreen implements Screen, InputProcessor {
 
 		cam.update();
 		if(colorMode){
-			Gdx.gl.glClearColor(1f, 0.950f, 0.941f, 1f);
+			Gdx.gl.glClearColor(0.9f, 0.10f, 0.35f, 1f);
+			// Gdx.gl.glClearColor(1f, 0.950f, 0.941f, 1f);
 		}else{
 			Gdx.gl.glClearColor(0f, 0f, 0f, 1);
 		}
@@ -139,7 +134,8 @@ public class GameScreen implements Screen, InputProcessor {
 		shapeRenderer.begin(ShapeType.Line);
 		// border
 		if(colorMode){
-			shapeRenderer.setColor(0.412f, 0.412f, 0.412f, 1f);
+			shapeRenderer.setColor(0.6f, 1f, 0.2f, 1f);
+			// shapeRenderer.setColor(0.412f, 0.412f, 0.412f, 1f);
 		}else{
 			shapeRenderer.setColor(0.3f, 0.3f, 0.3f, 1);
 		}
@@ -147,7 +143,8 @@ public class GameScreen implements Screen, InputProcessor {
 		// grid
 		float sep = 2.5f;
 		if(colorMode){
-			shapeRenderer.setColor(0.9f, 0.9f, 0.9f, 1f);
+			shapeRenderer.setColor(1.000f, 0.20f, 0.35f, 1f);
+			// shapeRenderer.setColor(0.9f, 0.9f, 0.9f, 1f);
 		}else{
 			shapeRenderer.setColor(0.05f, 0.05f, 0.05f, 1);
 		}
@@ -159,7 +156,8 @@ public class GameScreen implements Screen, InputProcessor {
 		}
 		sep = 5f;
 		if(colorMode){
-			shapeRenderer.setColor(0.863f, 0.863f, 0.863f, 1f);
+			shapeRenderer.setColor(1.000f, 0.412f, 0.706f, 1f);
+			// shapeRenderer.setColor(0.863f, 0.863f, 0.863f, 1f);
 		}else{
 			shapeRenderer.setColor(0.1f, 0.1f, 0.1f, 1);
 		}
@@ -172,7 +170,8 @@ public class GameScreen implements Screen, InputProcessor {
 		
 		// walls
 		if(colorMode){
-			shapeRenderer.setColor(0f, 0.749f, 1f, 1f);
+			shapeRenderer.setColor(0.6f, 1f, 0.2f, 1f);
+			// shapeRenderer.setColor(0f, 0.749f, 1f, 1f);
 		}else{
 			shapeRenderer.setColor(1, 1, 1, 1);
 		}
@@ -187,7 +186,8 @@ public class GameScreen implements Screen, InputProcessor {
 		Vector3D ballpos = ball.getPosition();
 		// hole
 		if(colorMode){
-			shapeRenderer.setColor(1f, 0.412f, 0.706f, 1);
+			shapeRenderer.setColor(0.871f, 0.722f, 0.529f, 1);
+			// shapeRenderer.setColor(1f, 0.412f, 0.706f, 1);
 		}else{
 			shapeRenderer.setColor(0.2f, 0.6f, 0.2f, 1);
 		}
@@ -196,7 +196,8 @@ public class GameScreen implements Screen, InputProcessor {
 		shapeRenderer.circle((float)holepos.x, (float)holepos.y, (float)radius, 20);
 		// start position
 		if(colorMode){
-			shapeRenderer.setColor(0.863f, 0.863f, 0.863f, 1f);
+			shapeRenderer.setColor(0.871f, 0.722f, 0.529f, 1f);
+			// shapeRenderer.setColor(0.863f, 0.863f, 0.863f, 1f);
 		}else{
 			shapeRenderer.setColor(0.3f, 0.3f, 0.3f, 1);
 		}
@@ -208,7 +209,8 @@ public class GameScreen implements Screen, InputProcessor {
 			// line between mouse and ball when dragging
 			if ((draggingLeft && lastLeftMousePos.x != -1 && lastLeftMousePos.y != -1)){
 				if(colorMode){
-					shapeRenderer.setColor(0f, 0.749f, 1f, 1f);
+					shapeRenderer.setColor(0.8f, 1f, 1f, 1f);
+					// shapeRenderer.setColor(0f, 0.749f, 1f, 1f);
 				}else{
 					shapeRenderer.setColor(1, 1, 0, 1);
 				}
@@ -222,11 +224,23 @@ public class GameScreen implements Screen, InputProcessor {
 			shapeRenderer.begin(ShapeType.Filled);
 			// ball
 			if(colorMode){
-				shapeRenderer.setColor(1f, 0.078f, 0.576f, 1);
+				shapeRenderer.setColor(0.8f, 1f, 1f, 1);
+				// shapeRenderer.setColor(1f, 0.078f, 0.576f, 1);
 			}else{
 				shapeRenderer.setColor(0.7f, 0.7f, 0.7f, 1);
 			}
 			shapeRenderer.circle((float)ballpos.x, (float)ballpos.y, (float)ball.getRadius(), 20);
+		}else{
+			if (draggingLeft && lastLeftMousePos.x != -1 && lastLeftMousePos.y != -1){
+				if(colorMode){
+					shapeRenderer.setColor(0.8f, 1f, 1f, 1);
+					// shapeRenderer.setColor(0f, 0.749f, 1f, 1f);
+				}else{
+					shapeRenderer.setColor(1, 1, 0, 1);
+				}
+				Vector3 mouseInWorld = cam.unproject(new Vector3(lastLeftMousePos, 0));
+				shapeRenderer.line((float)wallStartPos.x, (float)wallStartPos.y, (float)mouseInWorld.x, (float)mouseInWorld.y);
+			}
 		}
 		shapeRenderer.end();
 
@@ -292,6 +306,33 @@ public class GameScreen implements Screen, InputProcessor {
 		if (key == Input.Keys.E) {
 			editMode = !editMode;
 		}
+		if (key == Input.Keys.BACKSPACE && editMode) {
+			map.removeLastWall();
+		}
+		if (key == Input.Keys.ENTER) {
+			if(editMode){
+				TextInputListener textListener = new TextInputListener(){
+					public void input (String text) {
+						mapFileName = text;
+						// System.out.println(mapFileName);
+						map.store(mapFileName);
+					}
+					public void canceled () {}
+				};
+				Gdx.input.getTextInput(textListener, "File name?", "map.json", "");
+			}else{
+				TextInputListener textListener = new TextInputListener(){
+					public void input (String text) {
+						mapFileName = text;
+						// System.out.println(mapFileName);
+						loadMap(mapFileName);
+					}
+					public void canceled () {}
+				};
+				Gdx.input.getTextInput(textListener, "File name?", "default.json", "");
+			}
+		}
+		
 		if (key == Input.Keys.C) {
 			colorMode = !colorMode;
 		}
@@ -326,9 +367,15 @@ public class GameScreen implements Screen, InputProcessor {
 	public boolean touchDown(int screenX, int screenY, int pointer, int button){
 		if(button == 0){
 			draggingLeft = true;
+			if(editMode){
+				wallStartPos = cam.unproject(new Vector3(screenX, screenY, 0));
+			}
 		}
 		if(button == 1){
 			draggingRight = true;
+		}
+		if(button == 2){
+			draggingMiddle = true;
 		}
 		return false;
 	}
@@ -348,19 +395,40 @@ public class GameScreen implements Screen, InputProcessor {
 		if(draggingLeft){
 			lastLeftMousePos.set(screenX, screenY);
 		}
+		if(draggingMiddle){
+			float snapdist = 5f;
+
+			Vector3 mousepos = cam.unproject(new Vector3(screenX, screenY, 0));
+			Vector3 holepos = new Vector3((float)map.getHolePosition().x, (float)map.getHolePosition().y, 0);
+			Vector3 startpos = new Vector3((float)map.getStartPosition().x, (float)map.getStartPosition().y, 0);
+			float holedist = holepos.dst(mousepos);
+			float startdist = startpos.dst(mousepos);
+			if(holedist < snapdist){
+				map.setHolePosition(new Vector3D(mousepos.x, mousepos.y, 0));
+			}else if(startdist < snapdist){
+				map.setStartPosition(new Vector3D(mousepos.x, mousepos.y, 0));
+			}
+		}
 		return false;
 	}
 
 	public boolean touchUp(int screenX, int screenY, int pointer, int button){
 		if(button == 0){
-			// 'hit' the ball
-			Vector3 mouseInWorld = cam.unproject(new Vector3(screenX, screenY, 0));
-			Vector3D dx = new Vector3D(mouseInWorld.x, mouseInWorld.y, 0);
-			dx.sub(ball.getPosition());
-			dx.mult(-1);
-			// multiply to scale velocity
-			dx.mult(5);
-			ball.kick(dx);
+			if(!editMode){
+				// 'hit' the ball
+				Vector3 mouseInWorld = cam.unproject(new Vector3(screenX, screenY, 0));
+				Vector3D dx = new Vector3D(mouseInWorld.x, mouseInWorld.y, 0);
+				dx.sub(ball.getPosition());
+				dx.mult(-1);
+				// multiply to scale velocity
+				dx.mult(5);
+				ball.kick(dx);
+			}else{
+				// add line to map here ...
+				Vector3 endpos = cam.unproject(new Vector3(screenX, screenY, 0));
+				map.addWall(wallStartPos.x, wallStartPos.y, endpos.x, endpos.y);
+				wallStartPos.set(-1,-1,0);
+			}
 
 			draggingLeft = false;
 			lastLeftMousePos.set(-1, -1);
@@ -368,7 +436,9 @@ public class GameScreen implements Screen, InputProcessor {
 		if(button == 1){
 			draggingRight = false;
 			lastRightMousePos.set(-1, -1);
-
+		}
+		if(button == 2){
+			draggingMiddle = false;
 		}
 		return false;
 	}
