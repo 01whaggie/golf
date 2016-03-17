@@ -145,7 +145,7 @@ public class GameScreen implements Screen, InputProcessor {
 		}
 		Vector3D ballpos = ball.getPosition();
 		// hole
-		shapeRenderer.setColor(0, 1, 0.2f, 1);
+		shapeRenderer.setColor(0.2f, 0.6f, 0.2f, 1);
 		Vector3D holepos = map.getHolePosition();
 		double radius = map.getHoleRadius();
 		shapeRenderer.circle((float)holepos.x, (float)holepos.y, (float)radius, 20);
