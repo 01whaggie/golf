@@ -52,9 +52,9 @@ public class GameScreen implements Screen, InputProcessor {
 
 	private Map map;
 	private GolfBall ball;
-	private Vector3D prevPosition;
-	private Vector3D newPosition;
 	private String ipAddress;
+
+	private boolean isClientRunning = false;
 
 	private String mapFileName;
 
@@ -84,18 +84,11 @@ public class GameScreen implements Screen, InputProcessor {
 
 		Gdx.input.setInputProcessor(this);
 
-
-		// ipAddress = readIPAddress();
-		// createClientThread();
-
 	}
 
 	private void loadMap(String path){
 		map = new Map(path);
 		Vector3D startingPos = map.getStartPosition().copy(); //new Vector3D(30, 30, 0);
-
-		prevPosition = new Vector3D(0, 0, 0);
-		newPosition = new Vector3D(40, 40, 0);
 		Vector3D velocity = new Vector3D(0, 0, 0);
 
 		double radius = 0.5;
@@ -308,6 +301,20 @@ public class GameScreen implements Screen, InputProcessor {
 		if (key == Input.Keys.E) {
 			editMode = !editMode;
 		}
+		if (key == Input.Keys.P) {
+
+			if (!isClientRunning) {
+				ipAddress = readIPAddress();
+				createClientThread();
+				isClientRunning = true;
+			}
+			else
+			{
+				isClientRunning = false;
+
+			}
+		}
+
 		if (key == Input.Keys.BACKSPACE && editMode) {
 			map.removeLastWall();
 		}
@@ -474,13 +481,9 @@ public class GameScreen implements Screen, InputProcessor {
 
 
 	public boolean hitBall(float deltaX, float deltaY){
-			// 'hit' the ball
-			Vector3D dx = new Vector3D(deltaX, deltaY, 0);
-			dx.sub(prevPosition);
-			dx.mult(-1);
-			// multiply to scale velocity
-			dx.mult(3);
-			ball.addVelocity(dx);
+		Vector3D dx = new Vector3D(deltaX, deltaY, 0);
+		dx.mult(3);
+		ball.addVelocity(dx);
 		return false;
 	}
 
@@ -511,7 +514,7 @@ public class GameScreen implements Screen, InputProcessor {
 				String requestToServer;
 				String coordsFromServer;
 
-				while (true) {
+				while (isClientRunning) {
 					try {
 						Socket clientSocket = new Socket(ipAddress, 7544);
 						DataOutputStream outToServer = new DataOutputStream(clientSocket.getOutputStream());
