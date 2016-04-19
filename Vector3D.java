@@ -183,7 +183,7 @@ public class Vector3D {
 		double dot = x*v.x + y*v.y + z*v.z;
 		return dot;
 	}
-	
+
 	/**
 	 * Calculate the cross product with another vector
 	 * @return  the cross product
@@ -194,7 +194,14 @@ public class Vector3D {
 		double crossZ = x * v.y - v.x * y;
 		return(new Vector3D(crossX,crossY,crossZ));
 	}
-	
+
+	public static Vector3D substract(Vector3D x, Vector3D y) {
+		Vector3D result = x.copy();
+		result.sub(y);
+		return result;
+	}
+
+
 	/**
 	 * Normalize the vector to length 1 (make it a unit vector)
 	 */     

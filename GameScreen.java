@@ -1,26 +1,17 @@
-import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Input.TextInputListener;
 import com.badlogic.gdx.InputProcessor;
-import com.badlogic.gdx.InputAdapter;
-import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
-import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
-import com.badlogic.gdx.graphics.FPSLogger;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.*;
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.utils.Align;
 
@@ -51,7 +42,7 @@ public class GameScreen implements Screen, InputProcessor {
 	private BitmapFont font;
 
 	private Map map;
-	private GolfBall ball;
+	private NewBall ball;
 	private Vector3D prevPosition;
 	private Vector3D newPosition;
 	private String ipAddress;
@@ -99,7 +90,7 @@ public class GameScreen implements Screen, InputProcessor {
 		Vector3D velocity = new Vector3D(0, 0, 0);
 
 		double radius = 0.5;
-		ball = new GolfBall(startingPos, velocity, radius, 1, this.map);
+		ball = new NewBall(startingPos, velocity, radius, 1, this.map);
 	}
 
 	private void updateCamera(){
@@ -264,14 +255,14 @@ public class GameScreen implements Screen, InputProcessor {
 					break;
 				case HOLE:
 					stateText += "yay!";
-					font.setColor(1,0,1,1);
+					font.setColor(0.871f, 0.722f, 0.529f,1);
 					font.getData().setScale(1f);
 					font.draw(spriteBatch, "Success!", 0, h-font.getCapHeight(), w, Align.center, false);
 					break;
 			}
 			// font.draw(spriteBatch, stateText, 10, h-10-font.getCapHeight()-20);
 		}else{
-			font.setColor(1,0,1,1);
+			font.setColor(0.871f, 0.722f, 0.529f,1);
 			font.getData().setScale(1f);
 			font.draw(spriteBatch, "Editing Mode", 0, h-font.getCapHeight(), w, Align.center, false);
 		}
